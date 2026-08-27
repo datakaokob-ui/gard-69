@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบบันทึกการอยู่เวรรักษาการณ์ - อบต.เขากอบ</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SweetAlert2 via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Supabase JS Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Google Font: Sarabun -->
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-3 md:p-6 text-slate-800">
+
+  <div class="max-w-5xl mx-auto space-y-6">
+    
+    <!-- Header Card -->
+    <header class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
+      <div class="flex items-center gap-3">
+        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-900">ระบบบันทึกการอยู่เวรรักษาการณ์สถานที่ราชการ</h1>
+          <p class="text-sm text-slate-500">องค์การบริหารส่วนตำบลเขากอบ  อำเภอห้วยยอด จังหวัดตรัง 075-500088</p>
+        </div>
+      </div>
+      <div class="bg-red-50 text-red-700 px-4 py-2 rounded-xl border border-red-200 text-sm font-semibold flex items-center gap-2">
+        <span>🚨 ฉุกเฉินโทร: 086-9569452</span>
+      </div>
+    </header>
+
+    <!-- Main Entry Form -->
+    <form id="guardForm" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6 no-print">
+      
+      <!-- ส่วนที่ 1: ข้อมูลผู้อยู่เวรและเวลา -->
+      <section>
+        <h2 class="text-md font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
+          <span class="w-2 h-5 bg-blue-600 rounded-full inline-block"></span> 1. ข้อมูลการอยู่เวร
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">วันที่ทำบันทึก *</label>
+            <input type="date" id="recordDate" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ชื่อ-นามสกุล ผู้อยู่เวร *</label>
+            <select id="officerName" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+              <option value="">-- เลือกรายชื่อ --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ตำแหน่ง *</label>
+            <select id="officerPosition" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+              <option value="">-- เลือกตำแหน่ง --</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ช่วงเวลาปฏิบัติหน้าที่ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">วันที่ปฏิบัติหน้าที่เวร *</label>
+            <input type="date" id="dutyDate" required class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ช่วงเวลาปฏิบัติหน้าที่ (เวรตั้งแต่เวลา) *</label>
+            <select id="shiftTime" required class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+              <option value="">-- เลือกช่วงเวลาอยู่เวร --</option>
+              <option value="08.30 - 16.30 น.">08.30 - 16.30 น.</option>
+              <option value="12.00 - 13.00 น.">12.00 - 13.00 น.</option>
+              <option value="16.30 - 08.30 น.">16.30 - 08.30 น.</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- ส่วนที่ 2: การรับมอบหน้าที่และทรัพย์สิน -->
+      <section>
+        <h2 class="text-md font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
+          <span class="w-2 h-5 bg-blue-600 rounded-full inline-block"></span> 2. การรับมอบหน้าที่และกุญแจ
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ได้รับมอบหน้าที่เวรฯ จาก</label>
+            <select id="prevOfficerName" class="w-full p-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 transition">
+              <option value="">-- เลือกผู้ส่งมอบหน้าที่ --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ตำแหน่งผู้ส่งมอบ</label>
+            <select id="prevOfficerPosition" class="w-full p-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 transition">
+              <option value="">-- เลือกตำแหน่งผู้ส่งมอบ --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <p class="text-xs font-semibold text-slate-600 mb-2">รายการกุญแจที่ได้รับมอบ:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer p-2 bg-white rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+              <input type="checkbox" id="keyOffice" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+              <span>กุญแจสำนักงาน 1 ชุด</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer p-2 bg-white rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+              <input type="checkbox" id="keyCar9713" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+              <span>กุญแจรถยนต์ส่วนกลาง กท 9713 ตรัง</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer p-2 bg-white rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+              <input type="checkbox" id="keyCar5007" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+              <span>กุญแจรถยนต์สวนกลาง กข 5007 ตรัง</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ส่วนที่ 3: สรุปเหตุการณ์และการส่งมอบ -->
+      <section>
+        <h2 class="text-md font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
+          <span class="w-2 h-5 bg-blue-600 rounded-full inline-block"></span> 3. สรุปเหตุการณ์และส่งมอบงาน
+        </h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-2">สถานการณ์ในระหว่างปฏิบัติหน้าที่ *</label>
+            <div class="flex gap-6">
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="incidentStatus" value="normal" checked onchange="toggleIncidentRemark()" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                <span class="font-medium text-emerald-700">เหตุการณ์ปกติ</span>
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="incidentStatus" value="abnormal" onchange="toggleIncidentRemark()" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                <span class="font-medium text-red-600">เหตุการณ์ไม่ปกติ</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="incidentRemarkGroup" class="hidden">
+            <label class="block text-xs font-semibold text-red-600 mb-1">รายละเอียดเหตุการณ์ไม่ปกติ *</label>
+            <textarea id="incidentRemark" rows="2" placeholder="ระบุรายละเอียดเหตุการณ์..." class="w-full p-2.5 border border-red-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-red-400"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ส่งมอบหน้าที่ให้เวรผลัดถัดไป</label>
+            <select id="nextOfficerName" class="w-full p-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 transition">
+              <option value="">-- เลือกผู้รับมอบเวรผลัดถัดไป --</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- ปุ่มบันทึก -->
+      <div class="pt-4 border-t flex justify-end">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold px-8 py-3 rounded-xl text-sm shadow-md transition-all flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+          </svg>
+          บันทึกการอยู่เวร
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Display Recorded Logs & Export Controls -->
+    <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4 no-print">
+      
+      <!-- Toolbar รายงาน -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+        <div>
+          <h2 class="text-md font-bold text-slate-800">รายการบันทึกการอยู่เวรทั้งหมด</h2>
+          <p class="text-xs text-slate-500">เลือกกรองตามเดือน/ปี หรือกดแสดงทั้งหมดเพื่อพิมพ์รายงานและส่งออก CSV</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <input type="month" id="reportMonth" class="p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+          
+          <button onclick="clearMonthFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-sm font-medium border border-slate-200 transition">
+            แสดงทั้งหมด
+          </button>
+          
+          <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1.5 shadow-sm transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            ส่งออก CSV
+          </button>
+          
+          <button onclick="printReport()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1.5 shadow-sm transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            พิมพ์รายงาน
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Content -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-slate-50 border-b text-slate-600 font-semibold">
+              <th class="p-3">วันที่เวร</th>
+              <th class="p-3">ผู้อยู่เวร</th>
+              <th class="p-3">ช่วงเวลา</th>
+              <th class="p-3">ผู้ส่งมอบเวร</th>
+              <th class="p-3">กุญแจที่ได้รับ</th>
+              <th class="p-3">สถานะเหตุการณ์</th>
+              <th class="p-3 text-center">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Application Script -->
+  <script>
+    // -------------------------------------------------------------
+    // CONFIG: กำหนดค่าการเชื่อมต่อ Supabase
+    // -------------------------------------------------------------
+    const SUPABASE_URL = 'https://jdvnwvehtvhjhlepczjh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impkdm53dmVodHZoamhsZXBjempoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3OTM4MzAsImV4cCI6MjEwMzM2OTgzMH0.7qLpm9XHUopSDIrwHrKDWa75nPkmyZtiFuWhD6Gn10U';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // รายชื่อและตำแหน่งบุคลากร
+    const OFFICERS = [
+      "นายนอบ จันทรังษี", "นายปรีชา สามสี", "นายปุญณวิชญ์ อุ่นนุช", "นายธนวัฒน์ กิ้มเฉี้ยง",
+      "นายรชานนท์ เทียมหงษ์", "นายประหยัด เอี่ยมอักษร", "นายจรัญ พระเหมา", "นายภานุวัฒน์ คงรยด",
+      "นายทองดี กังวานศิลา", "นายประสาร แต้มเพชร", "นายสุธน ศรีโภคา", "นายเอกลักษณ์ คดีพิศาล",
+      "นายประชารัฐ ประทุมวัลย์", "นายก้องฤทธิ์ ผกาแก้ว", "นางอนุ อินทรวิเศษ", "นางสาวธิติมา ฉูมิ",
+      "นางสาวอัญชลี ขวัญเมือง", "นางสาวสุชาดา บริพันธ์", "นางสาวกรองแก้ว ทองศักดิ์", "นางสาววิลัยลักษณ์ หมื่นละม้าย",
+      "นางสาวรัชดาภรณ์ จันสุข", "นางสาวนรภัทร ตุลยสุข", "นางบำเพ็ญ สามสี", "นางสาวบุษรัตน์ วารีรักษ์",
+      "นางสาวพัทธนันท์ เพ่งพิโรจ", "นางสาวเนตรสุดา ณ ปัตตานี", "นางสุวนิตย์ รักงาม", "นางสาวสุภาวดี บุญเวศน์",
+      "นางสาวนิภาพร ไทยมิตรชอบ", "นางสาวปรีญานาฎ แก้วสุทธิ์"
+    ];
+
+    const POSITIONS = [
+      "ผู้ช่วยเจ้าพนักงานธุรการ", "นักวิชาการศึกษา", "นักวิชาการสาธารณสุขฯ", "ผู้ช่วยนายช่างโยธา",
+      "นายช่างโยธาฯ", "พนักงานซ่อมไฟฟ้า-ประปา", "พนักงานขับรถบรรทุกขยะ", "ผู้ช่วยนักป้องกันและบรรเทาฯ",
+      "คนสวน", "คนงานทั่วไป", "พนักงานขับรถยนต์ 1669", "พนักงานจดมาตรน้ำ", "พนักงานขับรถยนต์",
+      "พนักงานจำหน่ายตั๋วเรือ", "ผู้ช่วยเจ้าพนักงานพัสดุ", "ผู้ช่วยเจ้าพนักงานจัดเก็บรายได้",
+      "ผู้ช่วยเจ้าพนักงานธุรการกองช่าง", "เจ้าพนักงานการเงินบัญชี", "นักวิเคราะห์นโยบายและแผนฯ",
+      "นักทรัพยากรบุคคลฯ", "นักพัฒนาชุมชน", "ผู้ช่วยนักพัฒนาชุมชน", "ผู้ช่วยเจ้าพนักงานพัฒนาการท่องเที่ยวฯ",
+      "ครูผู้ดูแลเด็ก", "ผู้ช่วยครูดูแลเด็ก", "นักวิชาการตรวจสอบภายใน", "นักวิชาการพัสดุ",
+      "นักวิชาการเงินบัญชี", "นิติกร"
+    ];
+
+    let guardLogs = [];
+
+    // กำหนดค่าเริ่มต้นเมื่อโหลดหน้าเว็บ
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('recordDate').value = today;
+      document.getElementById('dutyDate').value = today;
+      document.getElementById('reportMonth').value = '';
+
+      populateDropdowns();
+      renderLogs();
+    });
+
+    // เพิ่มตัวเลือก Dropdown
+    function populateDropdowns() {
+      const officerSelects = [
+        document.getElementById('officerName'),
+        document.getElementById('prevOfficerName'),
+        document.getElementById('nextOfficerName')
+      ];
+
+      const positionSelects = [
+        document.getElementById('officerPosition'),
+        document.getElementById('prevOfficerPosition')
+      ];
+
+      officerSelects.forEach(select => {
+        OFFICERS.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          select.appendChild(opt);
+        });
+      });
+
+      positionSelects.forEach(select => {
+        POSITIONS.forEach(pos => {
+          const opt = document.createElement('option');
+          opt.value = pos;
+          opt.textContent = pos;
+          select.appendChild(opt);
+        });
+      });
+    }
+
+    // เปิด-ปิด ช่องกรอกหมายเหตุเหตุการณ์ไม่ปกติ
+    function toggleIncidentRemark() {
+      const status = document.querySelector('input[name="incidentStatus"]:checked').value;
+      const remarkGroup = document.getElementById('incidentRemarkGroup');
+      const remarkInput = document.getElementById('incidentRemark');
+
+      if (status === 'abnormal') {
+        remarkGroup.classList.remove('hidden');
+        remarkInput.required = true;
+      } else {
+        remarkGroup.classList.add('hidden');
+        remarkInput.required = false;
+        remarkInput.value = '';
+      }
+    }
+
+    // ดึงและแสดงรายการจาก Supabase
+    async function renderLogs() {
+      const tbody = document.getElementById('logTableBody');
+      tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400 font-medium">กำลังดึงข้อมูลจากฐานข้อมูล...</td></tr>';
+
+      const selectedMonth = document.getElementById('reportMonth').value;
+
+      let query = supabaseClient
+        .from('guard_logs')
+        .select('*')
+        .order('duty_date', { ascending: true });
+
+      if (selectedMonth) {
+        const year = selectedMonth.split('-')[0];
+        const month = selectedMonth.split('-')[1];
+        const lastDay = new Date(year, month, 0).getDate();
+        
+        query = query
+          .gte('duty_date', `${selectedMonth}-01`)
+          .lte('duty_date', `${selectedMonth}-${lastDay}`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Fetch error:', error);
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-500 font-medium">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+        return;
+      }
+
+      guardLogs = data || [];
+
+      if (guardLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 font-medium">ไม่พบข้อมูลบันทึกในระบบ</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      guardLogs.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-slate-700">${formatThaiDate(log.duty_date)}</td>
+          <td class="p-3 font-medium">${log.officer}<br><span class="text-xs text-slate-400 font-normal">${log.position}</span></td>
+          <td class="p-3"><span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 text-xs font-semibold">${log.shift_time}</span></td>
+          <td class="p-3 text-xs text-slate-600">${log.prev_officer || '-'}</td>
+          <td class="p-3 text-xs text-slate-600">${log.keys || 'ไม่มี'}</td>
+          <td class="p-3">
+            ${log.status === 'normal' 
+              ? '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full font-semibold">ปกติ</span>' 
+              : `<span class="px-2.5 py-1 bg-red-100 text-red-700 text-xs rounded-full font-semibold" title="${log.remark}">ไม่ปกติ</span>`}
+          </td>
+          <td class="p-3 text-center">
+            <button onclick="confirmDelete(${log.id})" class="text-slate-400 hover:text-red-500 p-1.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Submit บันทึกข้อมูลไปยัง Supabase
+    document.getElementById('guardForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const keys = [];
+      if (document.getElementById('keyOffice').checked) keys.push('กุญแจสำนักงาน');
+      if (document.getElementById('keyCar9713').checked) keys.push('กท 9713');
+      if (document.getElementById('keyCar5007').checked) keys.push('กท 5007');
+
+      const incidentStatus = document.querySelector('input[name="incidentStatus"]:checked').value;
+
+      const newRecord = {
+        record_date: document.getElementById('recordDate').value,
+        duty_date: document.getElementById('dutyDate').value,
+        officer: document.getElementById('officerName').value,
+        position: document.getElementById('officerPosition').value,
+        prev_officer: document.getElementById('prevOfficerName').value || '-',
+        prev_position: document.getElementById('prevOfficerPosition').value || '-',
+        next_officer: document.getElementById('nextOfficerName').value || '-',
+        shift_time: document.getElementById('shiftTime').value,
+        keys: keys.length > 0 ? keys.join(', ') : 'ไม่มี',
+        status: incidentStatus,
+        remark: incidentStatus === 'abnormal' ? document.getElementById('incidentRemark').value : 'ปกติ'
+      };
+
+      const { error } = await supabaseClient
+        .from('guard_logs')
+        .insert([newRecord]);
+
+      if (error) {
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาดในการบันทึก', text: error.message });
+        return;
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกข้อมูลเรียบร้อยแล้ว!',
+        text: 'ข้อมูลถูกนำเข้าสู่ระบบ Supabase เรียบร้อย',
+        confirmButtonColor: '#2563eb',
+        timer: 2000,
+        timerProgressBar: true
+      });
+
+      this.reset();
+      document.getElementById('recordDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('dutyDate').value = new Date().toISOString().split('T')[0];
+      toggleIncidentRemark();
+      renderLogs();
+    });
+
+    // ลบรายการบันทึก
+    function confirmDelete(id) {
+      Swal.fire({
+        title: 'ยืนยันการลบบันทึก?',
+        text: "คุณจะไม่สามารถกู้คืนข้อมูลรายการนี้ได้อีก!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ใช่, ลบรายการ',
+        cancelButtonText: 'ยกเลิก'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const { error } = await supabaseClient
+            .from('guard_logs')
+            .delete()
+            .eq('id', id);
+
+          if (error) {
+            Swal.fire('เกิดข้อผิดพลาด!', error.message, 'error');
+          } else {
+            renderLogs();
+            Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบออกจากระบบเรียบร้อยแล้ว', 'success');
+          }
+        }
+      });
+    }
+
+    // ล้างตัวกรองเดือน
+    function clearMonthFilter() {
+      document.getElementById('reportMonth').value = '';
+      renderLogs();
+    }
+
+    // แปลงรูปแบบวันที่เป็นไทย
+    function formatThaiDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+    }
+
+    // ส่งออกไฟล์ CSV
+    function exportCSV() {
+      const selectedMonth = document.getElementById('reportMonth').value || 'ทั้งหมด';
+
+      if (guardLogs.length === 0) {
+        Swal.fire({ icon: 'info', title: 'ไม่พบข้อมูล', text: 'ไม่มีรายการข้อมูลสำหรับส่งออก' });
+        return;
+      }
+
+      let csvContent = "\uFEFFลำดับ,วันที่เวร,ผู้อยู่เวร,ตำแหน่ง,ช่วงเวลาเวร,ผู้ส่งมอบเวร,ตำแหน่งผู้ส่งมอบ,กุญแจที่ได้รับ,สถานะเหตุการณ์,รายละเอียดเหตุการณ์,ผู้รับมอบเวรผลัดถัดไป\n";
+
+      guardLogs.forEach((log, index) => {
+        csvContent += `"${index + 1}","${log.duty_date}","${log.officer}","${log.position}","${log.shift_time}","${log.prev_officer}","${log.prev_position}","${log.keys}","${log.status === 'normal' ? 'ปกติ' : 'ไม่ปกติ'}","${log.remark}","${log.next_officer}"\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `รายงานการอยู่เวร_อบตเขากอบ_${selectedMonth}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // พิมพ์รายงาน
+    function printReport() {
+      const selectedMonth = document.getElementById('reportMonth').value;
+      const titleMonth = selectedMonth ? `ประจำเดือน ${selectedMonth}` : 'รายการทั้งหมด';
+
+      if (guardLogs.length === 0) {
+        Swal.fire({ icon: 'info', title: 'ไม่พบข้อมูล', text: 'ไม่มีรายการข้อมูลสำหรับพิมพ์รายงาน' });
+        return;
+      }
+
+      const printWindow = window.open('', '_blank');
+      let rowsHtml = guardLogs.map((log, index) => `
+        <tr>
+          <td style="border: 1px solid #000; padding: 6px; text-align: center;">${index + 1}</td>
+          <td style="border: 1px solid #000; padding: 6px; text-align: center;">${formatThaiDate(log.duty_date)}</td>
+          <td style="border: 1px solid #000; padding: 6px;">${log.officer}<br><small>${log.position}</small></td>
+          <td style="border: 1px solid #000; padding: 6px; text-align: center;">${log.shift_time}</td>
+          <td style="border: 1px solid #000; padding: 6px;">${log.prev_officer}</td>
+          <td style="border: 1px solid #000; padding: 6px;">${log.keys}</td>
+          <td style="border: 1px solid #000; padding: 6px; text-align: center;">${log.status === 'normal' ? 'ปกติ' : 'ไม่ปกติ (' + log.remark + ')'}</td>
+        </tr>
+      `).join('');
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>รายงานสรุปการอยู่เวรรักษาการณ์ ${titleMonth}</title>
+          <style>
+            body { font-family: 'Sarabun', sans-serif; padding: 20px; line-height: 1.4; }
+            h2, h3 { text-align: center; margin: 4px 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+            th { border: 1px solid #000; padding: 8px; background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h2>รายงานสรุปการอยู่เวรรักษาการณ์สถานที่ราชการ</h2>
+          <h3>องค์การบริหารส่วนตำบลเขากอบ ${titleMonth}</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ลำดับ</th>
+                <th>วันที่เวร</th>
+                <th>ผู้อยู่เวร</th>
+                <th>ช่วงเวลาเวร</th>
+                <th>ผู้ส่งมอบเวร</th>
+                <th>กุญแจที่ได้รับ</th>
+                <th>สถานะเหตุการณ์</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          <div style="margin-top: 40px; text-align: right; font-size: 14px;">
+            <p>ลงชื่อ..........................................................ผู้จัดทำรายงาน</p>
+            <p>(..........................................................)</p>
+          </div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    // กรองการแสดงผลอัตโนมัติเมื่อเลือกเดือนใน Toolbar
+    document.getElementById('reportMonth').addEventListener('change', renderLogs);
+  </script>
+</body>
+</html>
