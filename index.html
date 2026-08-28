@@ -28,20 +28,33 @@
     
     <!-- Header Card -->
     <header class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
-      <div class="flex items-center gap-3">
-        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+      <div class="flex items-start sm:items-center gap-3">
+        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl mt-1 sm:mt-0">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
         </div>
         <div>
+          <!-- นาฬิกา Real-time ด้านบนซ้าย -->
+          <div class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md mb-1 border border-slate-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="liveClock">กำลังโหลดเวลา...</span>
+          </div>
+
           <h1 class="text-xl font-bold text-slate-900">ระบบบันทึกการอยู่เวรรักษาการณ์สถานที่ราชการ</h1>
-          <p class="text-sm text-slate-500">องค์การบริหารส่วนตำบลเขากอบ  อำเภอห้วยยอด จังหวัดตรัง 075-500088</p>
+          <p class="text-sm text-slate-500">
+            องค์การบริหารส่วนตำบลเขากอบ อำเภอห้วยยอด จังหวัดตรัง 
+            <a href="tel:075500088" class="text-blue-600 hover:underline font-medium ml-1">📞 075-500088</a>
+          </p>
         </div>
       </div>
-      <div class="bg-red-50 text-red-700 px-4 py-2 rounded-xl border border-red-200 text-sm font-semibold flex items-center gap-2">
+
+      <!-- ปุ่มโทรฉุกเฉิน กดโทรออกทันที -->
+      <a href="tel:0869569452" class="bg-red-50 hover:bg-red-100 active:scale-95 text-red-700 px-4 py-2.5 rounded-xl border border-red-200 text-sm font-semibold flex items-center gap-2 transition-all shadow-sm">
         <span>🚨 ฉุกเฉินโทร: 086-9569452</span>
-      </div>
+      </a>
     </header>
 
     <!-- Main Entry Form -->
@@ -230,9 +243,7 @@
 
   <!-- Application Script -->
   <script>
-    // -------------------------------------------------------------
     // CONFIG: กำหนดค่าการเชื่อมต่อ Supabase
-    // -------------------------------------------------------------
     const SUPABASE_URL = 'https://jdvnwvehtvhjhlepczjh.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impkdm53dmVodHZoamhsZXBjempoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3OTM4MzAsImV4cCI6MjEwMzM2OTgzMH0.7qLpm9XHUopSDIrwHrKDWa75nPkmyZtiFuWhD6Gn10U';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -242,7 +253,7 @@
       "นายนอบ จันทรังษี", "นายปรีชา สามสี", "นายปุญณวิชญ์ อุ่นนุช", "นายธนวัฒน์ กิ้มเฉี้ยง",
       "นายรชานนท์ เทียมหงษ์", "นายประหยัด เอี่ยมอักษร", "นายจรัญ พระเหมา", "นายภานุวัฒน์ คงรยด",
       "นายทองดี กังวานศิลา", "นายประสาร แต้มเพชร", "นายสุธน ศรีโภคา", "นายเอกลักษณ์ คดีพิศาล",
-      "นายประชารัฐ ประทุมวัลย์", "นายก้องฤทธิ์ ผกาแก้ว", "นางอนุ อินทรวิเศษ", "นางสาวธิติมา ฉูมิ",
+      "นายประชารัตน์ ประทุมวัลย์", "นายก้องฤทธิ์ ผกาแก้ว", "นางอนุ อินทรวิเศษ", "นางสาวธิติมา ฉูมิ",
       "นางสาวอัญชลี ขวัญเมือง", "นางสาวสุชาดา บริพันธ์", "นางสาวกรองแก้ว ทองศักดิ์", "นางสาววิลัยลักษณ์ หมื่นละม้าย",
       "นางสาวรัชดาภรณ์ จันสุข", "นางสาวนรภัทร ตุลยสุข", "นางบำเพ็ญ สามสี", "นางสาวบุษรัตน์ วารีรักษ์",
       "นางสาวพัทธนันท์ เพ่งพิโรจ", "นางสาวเนตรสุดา ณ ปัตตานี", "นางสุวนิตย์ รักงาม", "นางสาวสุภาวดี บุญเวศน์",
@@ -262,12 +273,27 @@
 
     let guardLogs = [];
 
+    // ฟังก์ชันนาฬิกา Real-time
+    function updateLiveClock() {
+      const now = new Date();
+      const clockElem = document.getElementById('liveClock');
+      if (clockElem) {
+        const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        clockElem.textContent = `${dateStr} | ${timeStr} น.`;
+      }
+    }
+
     // กำหนดค่าเริ่มต้นเมื่อโหลดหน้าเว็บ
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('recordDate').value = today;
       document.getElementById('dutyDate').value = today;
       document.getElementById('reportMonth').value = '';
+
+      // เริ่มทำงานระบบนาฬิกา
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
 
       populateDropdowns();
       renderLogs();
